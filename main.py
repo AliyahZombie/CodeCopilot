@@ -42,6 +42,9 @@ system_message = {
         "askForInput": "Please note that the execution results of the command will always be sent to you. Request additional information from the user or ask for further requirements only when necessary. Whether user input is needed (true/false)"
         }
         If the project requires manual intervention (e.g., front-end code), include 'manual intervention' in the message.
+        Code execute result will be provided by system, do NOT ask user for code output.
+        Always try to use programming to solve user request.
+        Remember that only print output will be sent to you, so you need to print the output if you have to debug.
         When the project is complete, set the status to 'completed'."""
 }
 
@@ -123,7 +126,7 @@ while True:
         # 自动执行 run_command 并捕获输出
         if run_command:
             print(f"{fg('magenta')}执行命令: {run_command}{attr('reset')}")
-            if input(f"{fg('red')}是否执行命令？(y/n): {attr('reset')}").lower() == 'y':
+            if True or input(f"{fg('red')}是否执行命令？(y/n): {attr('reset')}").lower() == 'y':
                 try:
                     result = subprocess.run(run_command, shell=True, cwd=project_dir, capture_output=True, text=True)
                     if result.returncode == 0:
@@ -137,7 +140,7 @@ while True:
                     print(f"{fg('red')}执行命令时发生错误: {output}{attr('reset')}")
                 
                 # 将命令输出发回给模型
-                conversation_history.append({"role": "user", "content": f"命令执行输出：\n{output}"})
+                conversation_history.append({"role": "system", "content": f"命令执行输出：\n{output}"})
             else:
                 conversation_history.append({"role": "system", "content": "用户拒绝了命令执行"})
 
@@ -153,5 +156,6 @@ while True:
     
     except json.JSONDecodeError:
         print(f"{fg('red')}助手响应格式错误，请重试。{attr('reset')}")
+        print(assistant_response)
     except Exception as e:
         print(f"{fg('red')}发生错误: {str(e)}{attr('reset')}")
